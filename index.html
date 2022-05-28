@@ -10,43 +10,66 @@
 <body>
 
   <header>
+   <img src="" alt="">
     <h1>GoogleBooks検索</h1>
-    <p>
-      <input type="text" id="keyword" value="レスポンシブWeb">
-      <button id="readbook">データ読み込み</button>
-    </p>
-  </header>
+    <a href=""></a>
+    <div>
+      <input type="text" id="key">
+      <button id="send">Search</button>
+    </div>
+      </header>
 
-  <main>
-    <p id="content"></p>
-  </main>
+<main>
+    <div>
+        <table id="list">
+            <tr>
+                <td style="width:300px">書籍名</td>
+                <td style="width:200px">出版社</td>
+                <td style="width:200px">画像</td>
+                <td style="width:500px">詳細</td>
+            </tr>
+        </table>
+    </div>
+  
+</main>
 
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
 <script src="js/jquery-3.5.1.min.js"></script>
 <script>
-// 手順
-// 1. $.get() を使って 情報を取得する
-// 2. JSONデータ構造を基に本のタイトルを取得する
-// 3. 本のタイトル情報をHTMLに出力する
-
-
-// $.get() を使う[開始]
-$.get('https://www.googleapis.com/books/v1/volumes?q=CSS', function (data) {
-  console.log(data);
-  const items = data.items
-  for(let i = 0; i < items.length; i++) {
-    console.log(items[i]);
-    const title = items[i].volumeInfo.title;　//配列で入っている数字がある。Volume infoに著者情報。本の名前、タイトルが出てくる。items>0>volumeinfo>titlesで入ってる
-    $('#content').append(`<ul><li>${title}</li></ul>`)
-  }
-});
-// ---ここからは課題！
-// 4. クリックイベントで括る　
-// 5. id="keyword"の入力値を取得 → URLの"?q=jquery"の"queryの文字を取得した入力値（変数）に変える" 検索k脳
-// 6. 出版社も表示してみよう！（データ構造はconsole.logで確認！！）　出版社を表示。
-
-
-
+ $("#send").on("click",function(){
+        const url = "https://www.googleapis.com/books/v1/volumes?q="+$("#key").val(); 
+        $.ajax({
+            url: url,
+            dataType: "json"
+        }).done(function(data) {
+            //書籍名、出版社、サムネイル[リンク]
+            console.log(data);             //オブジェクトの中を確認
+            const len = data.items.length; //データの数を取得
+            let html;
+            for(let i=0; i<len; i++){
+                console.log(typeof data.items[i].volumeInfo.publisher);
+                if(typeof data.items[i].volumeInfo.publisher=="undefined"){
+                    data.items[i].volumeInfo.publisher="出版社（不明）";
+                }
+                html += `
+                    <tr>
+                        <td>${data.items[i].volumeInfo.title}</td>
+                        <td>${data.items[i].volumeInfo.publisher}</td>
+                        <td>
+                            <a target="_blank" href="${data.items[i].volumeInfo.infoLink}">
+                                <img src="${data.items[i].volumeInfo.imageLinks.thumbnail}">
+                            </a>
+                        </td>
+                        <td >${data.items[i].volumeInfo.description}</td>
+                    </tr>
+                `;
+            }
+            //table要素のid="list"に追加
+            $("#list").append(html).fadeIn(1000).fadeOut(10000);;
+        });
+    });
 
 // $.get() を使う[終了]
 
